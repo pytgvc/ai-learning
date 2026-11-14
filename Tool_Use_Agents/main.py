@@ -3,9 +3,6 @@ from google.genai import types
 import os
 import datetime
 
-
-# 1. SETUP GEMINI
-
 api_key = os.getenv("GEMINI_API_KEY")
 
 if not api_key:
@@ -13,20 +10,11 @@ if not api_key:
 
 client = genai.Client(api_key=api_key)
 
-
-# 2. TOOL 1: ADD NUMBERS
-
 def add_numbers(a, b):
     return a + b
 
-
-# 3. TOOL 2: GET TODAY'S DATE
-
 def get_today_date():
     return str(datetime.date.today())
-
-
-# 4. TOOL DESCRIPTIONS FOR GEMINI
 
 add_tool = types.FunctionDeclaration(
     name="add_numbers",
@@ -62,16 +50,10 @@ tools = types.Tool(
     function_declarations=[add_tool, date_tool]
 )
 
-
-# 5. AVAILABLE PYTHON FUNCTIONS
-
 available_tools = {
     "add_numbers": add_numbers,
     "get_today_date": get_today_date
 }
-
-
-# 6. USER QUESTION
 
 prompt = input("Ask something: ")
 
@@ -82,8 +64,6 @@ history = [
     )
 ]
 
-
-# 7. AGENT LOOP
 
 step_count = 0
 max_steps = 5
@@ -102,16 +82,13 @@ while step_count < max_steps:
         )
     )
 
-    # Print raw response
     print("Gemini is thinking")
 
-    # Get model response
+   
     model_content = response.candidates[0].content
 
-    # Save model response in history
     history.append(model_content)
 
-    # Check function calls
     function_calls = response.function_calls
 
     if not function_calls:
@@ -120,7 +97,7 @@ while step_count < max_steps:
         print(response.text)
         break
 
-    # Execute requested functions
+  
     tool_parts = []
 
     for call in function_calls:
@@ -148,7 +125,6 @@ while step_count < max_steps:
 
             tool_result = {"error": "Unknown tool"}
 
-        # Prepare tool response
         tool_parts.append(
             types.Part.from_function_response(
                 name=tool_name,
@@ -157,7 +133,6 @@ while step_count < max_steps:
             )
         )
 
-    # Send all tool results back to Gemini
     history.append(
         types.Content(
             role="user",
